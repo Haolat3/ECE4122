@@ -1,6 +1,6 @@
 /*
 Author:  Haolat Adebayo
-Date last modified: 9/25/2022
+Date last modified: 10/01/2022
 Organization: ECE4122_6122 Class
 
 Description:
@@ -12,29 +12,8 @@ from the top of a maze to the buttom
 #include <vector>
 using namespace std;
 
-
-/**
-* \brief Fibonacci Series using Dynamic Programming top-down approach
-* 
-* \param[in]      n       Index of Fibonacci number to calculate.
-* \param[in, out] vecF    Vector of previously calculated Fibonacci numbers.
-* 
-* \return                 Fibonacci number for given index n.
-*/
-
-uint64_t fibDynamicProgrammingTopDown(unsigned int n, vector<uint64_t> & vecF)
-{
-    if (n < 2 || vecF[n] > 0)
-    {
-        return vecF[n];
-    }
-
-    vecF[n] = fibDynamicProgrammingTopDown(n - 2, vecF) + fibDynamicProgrammingTopDown(n - 1, vecF);
-
-    return vecF[n];
-}
-
-
+bool first = true; 
+vector<vector<uint64_t> > Path_nums;
 
 
 /**
@@ -46,18 +25,23 @@ uint64_t fibDynamicProgrammingTopDown(unsigned int n, vector<uint64_t> & vecF)
 * \return                 Number of paths to from top of grid to bottom.
 */
 uint64_t numberGridPaths(unsigned int nRows, unsigned int nCols) {
-    unsigned int index = ((nCols - 1) * (nRows - 1));
-    vector<uint64_t> Fibb(index + 1, -1);
 
-    Fibb[0] = 0;
-    Fibb[1] = 1;
-    Fibb[2] = 1;
-    if ((nCols < 1) || (nRows < 1)) {
-        return 0;
+    if (first) {
+        Path_nums.resize(19, vector<uint64_t>(19, -1));
+        for (unsigned int i = 0; i <= 18; i++) {
+            Path_nums[0][i] = 0;
+            Path_nums[i][0] = 0;
+        }
+        Path_nums[1][1] = 1;
     }
-    uint64_t Fibb1 = fibDynamicProgrammingTopDown((nCols-1) * (nRows-1),Fibb);
-    uint64_t Fibb2 = fibDynamicProgrammingTopDown(nCols-1,Fibb);
-    uint64_t Fibb3 = fibDynamicProgrammingTopDown(((nCols-1) * (nRows-1)) - (nCols - 1),Fibb);
-    uint64_t result = Fibb1/ (Fibb2 * Fibb3);
-    return result;
+
+    first = false; 
+      
+    //Add the number of paths  into array
+    //if it is was not computed before
+    if(Path_nums[nRows][nCols] == -1) {
+        Path_nums[nRows][nCols] = numberGridPaths(nRows - 1, nCols) + numberGridPaths(nRows, nCols - 1);
+    }
+  
+    return Path_nums[nRows][nCols];
 }

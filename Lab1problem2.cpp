@@ -4,7 +4,6 @@ Date last modified: 9/25/2022
 Organization: ECE4122_6122 Class
 
 Description:
-
 program to solve a sudoku problem 
 */
 
@@ -20,8 +19,6 @@ using namespace std;
 //global variables 
 std::mutex outFileMutex;
 std::mutex inFileMutex;
-
-
 
 
 /// @brief Friend of class to input in grid elements 
@@ -48,91 +45,116 @@ fstream& operator<<(fstream& os, const SudokuGrid & gridIn) {
 	os << gridIn.m_strGridName << " " << gridIn.GridNum << endl;
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
-			if (j==3 || j==6)
-				os << " | ";
-			os << gridIn.gridElement[i][j] << " ";
-		}
-		if (i == 2 || i ==5) {
-			os << endl;
-			for (int k = 0; k < 9; k++)
-				os << "---";
+			os << gridIn.gridElement[i][j];
 		}
 		os << endl;
 	}
-	os << endl;
     return os;
 }
 
-//check whether num is present in col or not
+
+/// @brief          Checks whether a number is present in column or not
+/// @param col      The column index of sudoku grid 
+/// @param num      The number to check for 
+/// @return         true if the number is present in the column
 bool SudokuGrid::isPresentInCol(int col, int num) {
     for (int row = 0; row < 9; row++)
-      if (((int) get_gridElements(row, col)) == num)
-         return true;
-   return false;
+        if (get_gridElement(row, col) == num)
+            return true;
+    return false;
 }
 
-//check whether num is present in row or not
+
+/// @brief              Checks whether a number is present in row or not
+/// @param row          The row index of sudoku grid 
+/// @param num          The number to check for 
+/// @return             true if the number is present in the row 
 bool SudokuGrid::isPresentInRow(int row, int num) {
     for (int col = 0; col < 9; col++)
-      if (((int) get_gridElements(row, col)) == num)
-        return true;
-   return false;
+        if (get_gridElement(row, col) == num)
+            return true;
+    return false;
 }
 
-//check whether num is present in 3x3 box or not
+
+/// @brief                  Checks whether a number is present in 3x3 box or not
+/// @param boxStartRow      The starting row index of sudoku grid 
+/// @param boxStartCol      The starting column index of sudoku grid
+/// @param num              The number to check for 
+/// @return                 true if the number is present in the 3 X 3 box 
 bool SudokuGrid::isPresentInBox(int boxStartRow, int boxStartCol, int num) {
     for (int row = 0; row < 3; row++)
-      for (int col = 0; col < 3; col++)
-         if (((int) get_gridElements(row+boxStartRow, col+boxStartCol)) == num)
-            return true;
-   return false;
-}
-
-//get empty location and update row and column
-bool SudokuGrid::findEmptyPlace(int &row, int &col) {
-    for (row = 0; row < 9; row++)
-      for (col = 0; col < 9; col++)
-        if (((int) get_gridElements(row, col)) == 0) //marked with 0 is empty
-            return true;
-   return false;
+        for (int col = 0; col < 3; col++)
+            if (get_gridElement(row+boxStartRow, col+boxStartCol) == num)
+                return true;
+    return false;
 }
 
 
-//when item not found in col, row and current 3x3 box
+/// @brief          Gets empty location and update row and column
+/// @param row      The row index of sudoku grid 
+/// @param col      The column index of sudoku grid
+/// @return         true if a zero(unfilled) index is found
+bool SudokuGrid::findEmptyPlace(int* row, int* col) {
+    for (*row = 0; *row < 9; (*row)++)
+        for (*col = 0; *col < 9; (*col)++)
+            if (get_gridElement(*row, *col) == 0) //marked with 0 is empty
+                return true;
+    return false;
+}
+
+
+/// @brief          Searches for a number in in columnt, row and current 3x3 box
+/// @param row      The row index of sudoku grid 
+/// @param col      The column index of sudoku grid 
+/// @param num      The number to check for the in the grid 
+/// @return         true if the number is found in rol, colum and box 
 bool SudokuGrid::isValidPlace(int row, int col, int num) {
    return !isPresentInRow(row, num) && !isPresentInCol(col, num) && !isPresentInBox(row - row%3 ,col - col%3, num);
 }
 
-//solve the Sudoku 
+
+/// @brief      solve the Sudoku grid 
+/// @param  
+/// @return     true if the grid is solved 
 bool SudokuGrid::solve(void) {
-	//int row, col;
-    if (!findEmptyPlace(row, col)) 
+	int row, col;
+    if (!findEmptyPlace(&row, &col))  {
         return true; //when all places are filled
-    for (int num = 1; num <= 9; num++){ //valid numbers are 1 - 9
+	}
+    for (int num = 1; num <= 9; num++) { //valid numbers are 1 - 9
         if (isValidPlace(row, col, num))    { //check validation, if yes, put the number in the grid
-            set_gridElements(row, col, num);
+            set_gridElement(row, col, 48 + num);
             if (solve()) //recursively go for other rooms in the grid
                 return true;
 			//turn to unassigned space when conditions are not satisfied
-            set_gridElements(row, col, 0);
+            set_gridElement(row, col, 48 + 0);
         }
     }
    return false;
 }
 
-//
-unsigned char SudokuGrid:: get_gridElements(int row, int col) {
-    return gridElement[row][col]; 
+
+/// @brief          Gets the character at a particular row and column
+/// @param row      The row index of sudoku grid 
+/// @param col      The column index of sudoku grid 
+/// @return         The number at the row and column index of the grid 
+int SudokuGrid:: get_gridElement(int row, int col) {
+	int x = (int)gridElement[row][col] - (int)48;
+    return x;
 }
 
-void SudokuGrid:: set_gridElements(int row, int col, int num) {
-    gridElement[row][col] = (unsigned char) num; 
+/// @brief          Sets the character at a particular row and column
+/// @param row      The row index of sudoku grid 
+/// @param col      The column index of sudoku grid 
+/// @param num      The number that is written to the row and column index of the grid 
+void SudokuGrid:: set_gridElement(int row, int col, int num) {
+    gridElement[row][col] = (unsigned char)  num; 
 }
 
 
-
-
-
+/// @brief Thread function to read in sudoku grid, solve the puzzle, and output the sudoku solution
+/// @param  
 void solveSudokuPuzzles(void) {
 	SudokuGrid suduk;
 	bool isSolved = false;
@@ -154,13 +176,19 @@ void solveSudokuPuzzles(void) {
 	inFileMutex.unlock();
 }
 
-
+/// @brief  		Main function to get command line arguments for input and output
+///					file, spawn threads, join and connect the threads 
+/// @param argc 	Number of arguments from command line
+/// @param argv 	The characters gotten from the command line
+/// @return 		zero
 int main(int argc, char **argv) {
 	std::vector<std::thread> threadObjects;
 	int numThreads = 20;
-	outFile.open ("Lab2prob2.txt", std::fstream::out);
-	if (argc > 1) {
+	SudokuGrid suduk;
+	bool isSolved = false;
+	if (argc == 3) {
 		inFile.open(argv[1], std::fstream::in);
+		outFile.open (argv[2], std::fstream::out);
 		if (!inFile.is_open()) {
 			cout << "Could not open input file" << endl;
 			return 0;
@@ -170,7 +198,10 @@ int main(int argc, char **argv) {
 			return 0;
 		}  
 
-		outFile << "Solve results" << endl << endl;
+		//setting a value to 5
+		//suduk.set_gridElement(1, 0, 48 + 5);
+		//getting the value of a place 
+		//cast the char to int then subtract 48 from it 
 
 		//spawn threads 
 		for (int ii = 0 ; ii < numThreads-1 ; ii++) {
@@ -182,11 +213,12 @@ int main(int argc, char **argv) {
 			if (th.joinable())
 				th.join();
 		}
+		
 
 		inFile.close();
+		outFile.close();
 	} else {
-		cout << "Invalid Input File!" << endl;
+		cout << "Invalid Input or Output File!" << endl;
 	}
-	outFile.close();
 	return 0;
 }

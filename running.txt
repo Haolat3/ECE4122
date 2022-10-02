@@ -1,0 +1,21 @@
+Problem1
+- g++ numberGridPaths.cpp main.cpp -o num
+- ./num 1 1
+
+Problem2
+- g++ -o testing testing.cpp
+- ./testing input_sudoku.txt
+
+
+- g++ -o Lab1problem2 Lab1problem2.cpp -lpthread
+- ./Lab1problem2 input_sudoku.txt Lab1prob2.txt
+
+- g++ -o testing3 testing3.cpp
+- ./testing3
+
+
+Save and exit 
+:wq!
+Exit without saving
+:q!
+                                                              
